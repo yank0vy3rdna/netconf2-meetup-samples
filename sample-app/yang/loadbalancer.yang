@@ -1,0 +1,90 @@
+module loadbalancer {
+    namespace "urn:meetup:loadbalancer";
+    prefix l;
+    typedef WildcardIpAddress {
+        description "Provides regex for IP wildcard validation";
+        type string{
+            pattern "((([0-9]{1,2})|(1[0-9]{2,2})|(2[0-4][0-9])|(25[0-5])|\\*)\\.){3}(([0-9]{1,2})|(1[0-9]{2,2})|(2[0-4][0-9])|(25[0-5])|\\*)";
+        }
+    }
+    typedef Port {
+        description "Network port";
+        type uint16 {
+            range "0..65535";
+        }
+    }
+    grouping TopGrp {
+        leaf id {
+            mandatory true;
+            type string;
+        }
+    }
+    grouping RuleGrp {
+        uses TopGrp;
+        leaf from {
+            type WildcardIpAddress;
+            mandatory true;
+        }
+        container to {
+            choice to {
+                mandatory true;
+                case port {
+                    leaf port {
+                        type Port;
+                        mandatory true;
+                    }
+                }
+                case group {
+                    leaf group {
+                        type leafref {
+                            path "/LoadBalancerConfig/PortGroups/PortGroup/id";
+                        }
+                        mandatory true;
+                    }
+                }
+            }
+        }
+    }
+    list LoadBalancerConfig {
+        key "id";
+        min-elements 1;
+        max-elements 1;
+
+        uses TopGrp;
+
+        list PortGroups {
+            key "id";
+            min-elements 1;
+            max-elements 1;
+
+            uses TopGrp;
+
+            list PortGroup {
+                key "id";
+                leaf id {
+                    type string;
+                    mandatory true;
+                }
+
+                leaf-list port {
+                    min-elements 1;
+                    type Port;
+                }
+            }
+        }
+        list Rules {
+            key "id";
+            min-elements 1;
+            max-elements 1;
+            
+            uses TopGrp;
+            
+            list Rule {
+                key "id";
+                description "List of rules for traffic management";
+                uses RuleGrp;
+            }
+        }
+    }
+}
+
