@@ -24,7 +24,7 @@ type proxy struct {
 func NewProxy(proxyUseCase proxyUseCase) *proxy {
 	p := &proxy{proxyUseCase: proxyUseCase}
 	s := &http.Server{
-		Addr:           ":8080",
+		Addr:           ":19080",
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
